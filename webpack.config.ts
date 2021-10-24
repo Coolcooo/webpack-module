@@ -18,7 +18,10 @@ const config: webpack.Configuration = {
     },
     plugins: [
         new HtmlWebpackPlugin(),
-        new ModuleLogger(),
+        new ModuleLogger({
+            path: path.resolve(__dirname, './src'),
+            pathToSave: path.resolve(__dirname, './unused'),
+        }),
         new StatoscopePlugin({
             saveStatsTo: 'stats.json',
             saveOnlyStats: false,
@@ -30,6 +33,7 @@ const config: webpack.Configuration = {
             "buffer": require.resolve("buffer"),
             "stream": false,
             "crypto-browserify": require.resolve("crypto-browserify"),
+            "fs": false,
         },
         extensions: ['.ts', '.tsx'],
     },
