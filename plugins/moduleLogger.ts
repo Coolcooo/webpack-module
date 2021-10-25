@@ -1,5 +1,6 @@
 import { Compiler } from 'webpack';
 import * as fs from 'fs';
+import fg from 'fast-glob';
 
 type InputOptions = {
     path: string,
@@ -12,9 +13,10 @@ class ModuleLogger {
     private path: string;
     private pathToSave: string;
     constructor({ path, pathToSave }: InputOptions) {
-        this.path = path;
         this.pathToSave = pathToSave;
-        this.fsNames = new Set();
+        this.fsNames = new Set(fg.sync('src/**', {dot: true, absolute: true}));
+
+
     }
     apply(compiler: Compiler) {
         compiler.hooks.normalModuleFactory.tap(
@@ -22,17 +24,16 @@ class ModuleLogger {
             (normalModuleFactory) => {
                 normalModuleFactory.hooks.module.tap('ModuleLogger', (_module, _createData) => {
                     // @ts-ignore
-                    //this.fsNames.delete(`${_createData.resource}`);
+                    // @ts-ignore
+                    this.fsNames.delete(`${_createData.resource}`.replace(/\\/g, '/'));
                     return _module;
                 });
+                // fixme:
             }
         );
-        // compiler.hooks.compile.tap('ModuleLogger', () => {
-        //     this.getPathsAllFiles(this.path);
-        // });
-        // compiler.hooks.afterDone.tap('ModuleLogger', () => {
-        //     fs.writeFileSync(this.pathToSave, JSON.stringify(Array.from(this.fsNames)));
-        // });
+        compiler.hooks.afterDone.tap('ModuleLogger', () => {
+            fs.writeFileSync(this.pathToSave, JSON.stringify(Array.from(this.fsNames)));
+        });
     }
 
     // getPathsAllFiles(path: string) {
