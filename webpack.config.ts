@@ -23,9 +23,9 @@ const config: webpack.Configuration = {
             template: './src/index.html',
         }),
         new ModuleLogger({
-            templatePath: 'src/**',
+            templatePath: path.resolve(__dirname, './src'),
             pathToSave: path.resolve(__dirname, './unused'),
-            excludes: ['src/index.html'],
+            excludes: [path.resolve(__dirname, './src/index.html')],
         }),
         new StatoscopePlugin({
             saveStatsTo: 'stats.json',

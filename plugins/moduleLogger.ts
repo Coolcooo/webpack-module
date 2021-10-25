@@ -1,6 +1,5 @@
 import { Compiler } from 'webpack';
 import * as fs from 'fs';
-import fg from 'fast-glob';
 
 type InputOptions = {
     templatePath: string,
@@ -14,7 +13,8 @@ class ModuleLogger {
     private pathToSave: string;
     constructor({ templatePath, pathToSave, excludes }: InputOptions) {
         this.pathToSave = pathToSave;
-        this.fsNames = new Set(fg.sync(templatePath, {dot: true, absolute: true, ignore: excludes}));
+        this.fsNames = new Set();
+        this.getPathsAllFiles(templatePath, excludes);
     }
     apply(compiler: Compiler) {
         compiler.hooks.afterDone.tap('ModuleLogger', (stats) => {
@@ -30,18 +30,20 @@ class ModuleLogger {
         });
     }
 
-    // getPathsAllFiles(path: string) {
-    //     const files = fs.readdirSync(path);
-    //     for (const file of files) {
-    //         const pathOfFile = `${path}\\${file}`;
-    //         const isDirectory = fs.lstatSync(pathOfFile).isDirectory();
-    //         if (isDirectory) {
-    //             this.getPathsAllFiles(pathOfFile);
-    //         } else {
-    //             this.fsNames.add(pathOfFile);
-    //         }
-    //     }
-    // }
+    getPathsAllFiles(path: string, excludes?: Array<string>) {
+        const files = fs.readdirSync(path);
+        for (const file of files) {
+            const pathOfFile = `${path}/${file}`;
+            const isDirectory = fs.lstatSync(pathOfFile).isDirectory();
+            if (isDirectory) {
+                this.getPathsAllFiles(pathOfFile, excludes);
+            } else {
+                if (excludes.indexOf(pathOfFile) === -1) {
+                    this.fsNames.add(pathOfFile);
+                }
+            }
+        }
+    }
 }
 
 export default ModuleLogger;
