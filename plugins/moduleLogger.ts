@@ -3,24 +3,24 @@ import * as fs from 'fs';
 import fg from 'fast-glob';
 
 type InputOptions = {
-    path: string,
+    templatePath: string,
     pathToSave: string
+    excludes?: Array<string>
 }
 
 class ModuleLogger {
 
     private fsNames: Set<string>;
     private pathToSave: string;
-    constructor({ path, pathToSave }: InputOptions) {
+    constructor({ templatePath, pathToSave, excludes }: InputOptions) {
         this.pathToSave = pathToSave;
-        this.fsNames = new Set(fg.sync('src/**', {dot: true, absolute: true}));
-
+        this.fsNames = new Set(fg.sync(templatePath, {dot: true, absolute: true, ignore: excludes}));
     }
     apply(compiler: Compiler) {
         compiler.hooks.afterDone.tap('ModuleLogger', (stats) => {
             stats.compilation.modules.forEach(module => {
                 //@ts-ignore
-                 const modulePath = module.resource || (module.rootModule && module.rootModule.resource);
+                 const modulePath = module.resource;
                 if (typeof modulePath === 'string') {
                     this.fsNames.delete(modulePath);
                 }

@@ -19,10 +19,13 @@ const config: webpack.Configuration = {
         clean: true,
     },
     plugins: [
-        new HtmlWebpackPlugin(),
+        new HtmlWebpackPlugin({
+            template: './src/index.html',
+        }),
         new ModuleLogger({
-            path: path.resolve(__dirname, './src'),
+            templatePath: 'src/**',
             pathToSave: path.resolve(__dirname, './unused'),
+            excludes: ['src/index.html'],
         }),
         new StatoscopePlugin({
             saveStatsTo: 'stats.json',
