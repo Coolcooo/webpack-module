@@ -20,7 +20,7 @@ class ModuleLogger {
         compiler.hooks.afterDone.tap('ModuleLogger', (stats) => {
             stats.compilation.modules.forEach(module => {
                 //@ts-ignore
-                 const modulePath = module.resource;
+                 const modulePath = module.resource || (module.rootModule && module.rootModule.resource);
                 if (typeof modulePath === 'string') {
                     this.fsNames.delete(modulePath);
                 }
