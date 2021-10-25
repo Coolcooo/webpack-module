@@ -10,28 +10,22 @@ type InputOptions = {
 class ModuleLogger {
 
     private fsNames: Set<string>;
-    private path: string;
     private pathToSave: string;
     constructor({ path, pathToSave }: InputOptions) {
         this.pathToSave = pathToSave;
         this.fsNames = new Set(fg.sync('src/**', {dot: true, absolute: true}));
 
-
     }
     apply(compiler: Compiler) {
-        compiler.hooks.normalModuleFactory.tap(
-            'ModuleLogger',
-            (normalModuleFactory) => {
-                normalModuleFactory.hooks.module.tap('ModuleLogger', (_module, _createData) => {
-                    // @ts-ignore
-                    // @ts-ignore
-                    this.fsNames.delete(`${_createData.resource}`.replace(/\\/g, '/'));
-                    return _module;
-                });
-                // fixme:
-            }
-        );
-        compiler.hooks.afterDone.tap('ModuleLogger', () => {
+        compiler.hooks.afterDone.tap('ModuleLogger', (stats) => {
+            stats.compilation.modules.forEach(module => {
+                //@ts-ignore
+                 const modulePath = module.resource;
+                if (typeof modulePath === 'string') {
+                    this.fsNames.delete(modulePath);
+                }
+            });
+
             fs.writeFileSync(this.pathToSave, JSON.stringify(Array.from(this.fsNames)));
         });
     }
