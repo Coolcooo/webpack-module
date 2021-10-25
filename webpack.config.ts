@@ -1,12 +1,9 @@
 import * as path from 'path';
 import * as webpack from 'webpack';
-// @ts-ignore
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import StatoscopePlugin from '@statoscope/webpack-plugin';
-
 import ModuleLogger from './plugins/moduleLogger';
 
-// @ts-ignore
 const config: webpack.Configuration = {
     mode: 'production',
     entry: {
